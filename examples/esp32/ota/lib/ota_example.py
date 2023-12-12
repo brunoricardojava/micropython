@@ -10,7 +10,7 @@ class OTAUpdater:
         self._filenames = filenames
         self._version_url = self._version_url_parser()
         self._current_version = self._get_current_version()
-        
+
     def _repo_url_parser(self, repo_url) -> str:
         repo_url = self._change_domain_url(repo_url)
         repo_url = self._remove_tree_url(repo_url)
@@ -46,14 +46,22 @@ class OTAUpdater:
 
         return current_version
 
-    def check_for_updates(self) -> bool:
+    def check_for_updates(self, timeout=5) -> bool:
         new_version_available = False
-        headers = {"accept": "application/json"} 
-        response = requests.get(self._version_url, headers=headers)
-        version_json = json.load(response.text)
-        remote_version = version_json.get("version")
-        
-        if remote_version:
-            new_version_available = True if self._current_version != remote_version else False
-        
+        headers = {"accept": "application/json"}
+
+        try:
+            response = requests.get(self._version_url, headers=headers, timeout=timeout)
+            if response.status_code < 200 or response.status_code >= 300:
+                print(f"Falha na requisição, status_code: {response.status_code}")
+                return False
+
+            version_json = response.json()
+            remote_version = version_json.get("version")
+
+            if remote_version:
+                new_version_available = True if self._current_version != remote_version else False
+        except Exception as e:
+            print(f"Request Exception: {e}")
+
         return new_version_available

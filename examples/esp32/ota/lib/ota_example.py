@@ -43,20 +43,35 @@ class OTAUpdater:
                 except json.JSONDecodeError:
                     print(f"Erro ao abrir o arquivo {self._version_file_name}")
         else:
-            current_version = "0"
+            self._current_version = "0"
+            self._filenames = self._listdir()
+            self._filenames.append("/" + self._version_file_name)
             version_content = {
-                "version": current_version,
-                "filenames": self._listdir()
+                "version": self._current_version,
+                "filenames": self._filenames
             }
             with open(self._version_file_name, "w") as version_file:
                 json.dump(version_content, version_file)
-
-        return current_version
     
     @staticmethod
-    def _listdir() -> list:
-        #Retornar a lista de arquivos do dispositivo 
-        ...
+    def _listdir(root_dir: str = "") -> list:
+        """Retornar a lista de arquivos do dispositivo """
+        file_list = []
+
+        def recursive_search(directory):
+            items = os.listdir(directory)
+            for item in items:
+                item_path = directory + '/' + item  # Concatena o diretório com o nome do item
+                try:
+                    if os.stat(item_path)[0] & 0o100000:  # Verifica se é um arquivo (usando máscara de bits)
+                        file_list.append(item_path)
+                    elif os.stat(item_path)[0] & 0o040000:  # Verifica se é um diretório (usando máscara de bits)
+                        recursive_search(item_path)  # Chama recursivamente para o diretório encontrado
+                except:
+                    pass  # Ignora erros de permissão ou acesso a itens
+
+        recursive_search(root_dir)
+        return file_list
 
     def check_for_updates(self, timeout=5) -> bool:
         new_version_available = False

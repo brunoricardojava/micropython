@@ -98,8 +98,9 @@ class OTAUpdater:
             version_json = response.json()
             remote_version = version_json.get("version")
 
-            if remote_version:
-                new_version_available = True if self._current_version != remote_version else False
+            if self._current_version != remote_version:
+                new_version_available = True
+                self._filenames = version_json.get("filenames")
         except Exception as e:
             print(f"Request Exception: {e}")
 
@@ -123,7 +124,7 @@ class OTAUpdater:
         except Exception as e:
             print(f"Erro ao criar diretorios: {e}")
 
-    def download_code(self) -> bool:
+    def _download_code(self) -> bool:
         all_files_found = True
         
         try:
@@ -178,7 +179,7 @@ class OTAUpdater:
     def update(self):
         if self.check_for_updates():
             print("Atualização encontrada, seguindo com o download...")
-            if self.download_code():
+            if self._download_code():
                 if self._soft_reset:
                     machine.soft_reset()
                 if self._hard_reset:

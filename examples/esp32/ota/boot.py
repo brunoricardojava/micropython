@@ -1,7 +1,8 @@
 # boot.py -- run on boot-up
 import network
 from time import sleep_ms
-from secret import ssid, password
+from secret import ssid, password, url_project
+from ota_example import OTAUpdater
 
 
 station = network.WLAN(network.STA_IF)
@@ -16,3 +17,5 @@ while not station.isconnected():
     sleep_ms(500)
 
 print(f"Conected. Network config: {station.ifconfig()}")
+
+OTAUpdater(url_project).update()

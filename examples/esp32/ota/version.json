@@ -1,4 +1,4 @@
 {
-    "version": "0.1.2",
+    "version": "0.1.3",
     "filenames": ["/boot.py", "/lib/ota_example.py", "/main.py", "/pymakr.conf", "/secret.py", "/version.json"]
 }

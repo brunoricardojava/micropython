@@ -124,6 +124,34 @@ class OTAUpdater:
         except Exception as e:
             print(f"Erro ao criar diretorios: {e}")
 
+    def _remove_directory_recursive(self, directory):
+        def recursive_remove(current_directory):
+            try:
+                items = os.listdir(current_directory)
+                for item in items:
+                    item_path = '{}/{}'.format(current_directory, item)
+                    try:
+                        if os.stat(item_path)[0] & 0o040000:  # Verifica se é um diretório
+                            recursive_remove(item_path)  # Chama recursivamente para o diretório encontrado
+                        else:
+                            os.remove(item_path)  # Remove o arquivo
+                    except OSError as e:
+                        print(f"Erro ao remover item: {e}")
+                
+                os.rmdir(current_directory)  # Remove o diretório vazio
+            except OSError as e:
+                print(f"Erro ao acessar diretório: {e}")
+
+        recursive_remove(directory)
+
+    @classmethod
+    def _delete_tmp_dir(cls) -> None:
+        try:
+            # os.rmdir("tmp")
+            cls._remove_directory_recursive("tmp")
+        except:
+            pass
+
     def _download_code(self) -> bool:
         all_files_found = True
         
@@ -146,6 +174,7 @@ class OTAUpdater:
                 if response_status_code < 200 or response_status_code >= 300:
                     print(f"Arquivo não encontrado: {url_request}")
                     all_files_found = False
+                    break
 
                 self._make_dirs_recursive(tmp_path)
 
@@ -163,13 +192,11 @@ class OTAUpdater:
                     
                 print("Instalação concluida!")
 
-                try:
-                    os.rmdir("tmp")
-                except:
-                    pass
+                self._delete_tmp_dirs()
 
                 return True
             else:
+                print("Erro na atualização de um arquivo. Encerrando atualização.")
                 return False
 
         except Exception as e:

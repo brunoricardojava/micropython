@@ -1,15 +1,17 @@
-import os
-import json
+import uos as os
+import ujson as json
 import urequests as requests
 
 
 class OTAUpdater:
-    def __init__(self, repo_url: str, filenames: list) -> None:
+    def __init__(self, repo_url: str, filenames: list = None) -> None:
         self._version_file_name = "version.json"
         self._repo_url = self._repo_url_parser(repo_url)
         self._filenames = filenames
         self._version_url = self._version_url_parser()
-        self._current_version = self._get_current_version()
+        self._current_version = None
+        
+        self._load_version_file()
 
     def _repo_url_parser(self, repo_url) -> str:
         repo_url = self._change_domain_url(repo_url)
@@ -31,20 +33,30 @@ class OTAUpdater:
     def _version_url_parser(self) -> str:
         return self._repo_url + "/" + self._version_file_name
 
-    def _get_current_version(self) -> str:
+    def _load_version_file(self) -> None:
         if self._version_file_name in os.listdir():
             with open(self._version_file_name, "r+") as version_file:
                 try:
                     version_json = json.load(version_file)
-                    current_version = version_json.get("version")
+                    self._current_version = version_json.get("version")
+                    self._filenames = self._filenames if self._filenames else version_json.get("filenames")
                 except json.JSONDecodeError:
                     print(f"Erro ao abrir o arquivo {self._version_file_name}")
         else:
             current_version = "0"
+            version_content = {
+                "version": current_version,
+                "filenames": self._listdir()
+            }
             with open(self._version_file_name, "w") as version_file:
-                json.dump({"version": current_version}, version_file)
+                json.dump(version_content, version_file)
 
         return current_version
+    
+    @staticmethod
+    def _listdir() -> list:
+        #Retornar a lista de arquivos do dispositivo 
+        ...
 
     def check_for_updates(self, timeout=5) -> bool:
         new_version_available = False

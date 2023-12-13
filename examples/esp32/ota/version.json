@@ -1,1 +1,4 @@
-{"version": "0.2"}
+{
+    "version": "0.1",
+    "file_names" : ["main.py", "boot.py", "secret.py", "version.json", "lib/ota_example.py"]
+}

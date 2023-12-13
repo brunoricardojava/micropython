@@ -95,6 +95,24 @@ class OTAUpdater:
 
         return new_version_available
 
+    @staticmethod
+    def _make_dirs_recursive(file_path) -> None:
+        file_path = file_path.strip("/")
+        directory, filename = file_path.rsplit('/', 1)
+        try:
+            os.stat(directory)
+        except OSError:
+            directory_parts = directory.split("/")
+
+            for i in range(1, len(directory_parts) +1):
+                sub_dir = "/".join(directory_parts[:i])
+                try:
+                    os.mkdir(sub_dir)
+                except:
+                    pass
+        except Exception as e:
+            print(f"Erro ao criar diretorios: {e}")
+
     def download_code(self) -> bool:
         all_files_found = True
         
@@ -105,34 +123,44 @@ class OTAUpdater:
                 pass
             
             for file in self._filenames:
+                tmp_path = f"tmp{file}"
                 url_request = self._repo_url + file
+                print(f"Baixando arquivo: {url_request}")
                 response = requests.get(url_request, timeout=self._timeout)
-                
+
                 response_status_code = response.status_code
                 response_text = response.text
                 response.close()
-                
+
                 if response_status_code < 200 or response_status_code >= 300:
                     print(f"Arquivo não encontrado: {url_request}")
                     all_files_found = False
-                
-                with open(f"tmp{file}", "w") as update_file:
+
+                self._make_dirs_recursive(tmp_path)
+
+                with open(tmp_path, "w") as update_file:
                     update_file.write(response_text)
-            
+
             if all_files_found:
+                print("Download concluido. Instalando atualização...")
                 for file in self._filenames:
-                    with open(f"tmp{file}", "r") as new_file, open(file, "w") as code_file:
+                    print(file)
+                    tmp_path = f"tmp{file}" 
+                    with open(tmp_path, "r") as new_file, open(file, "w") as code_file:
                         code_file.write(new_file.read())
-                    os.remove(f"tmp{file}")
-                
+                    os.remove(tmp_path)
+                    
+                print("Instlaação concluida!")
+
                 try:
                     os.rmdir("tmp")
                 except:
                     pass
-                
+
                 return True
             else:
                 return False
+
         except Exception as e:
             print(f"Alguma coisa deu errado: {e}")
             return False

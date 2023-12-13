@@ -160,7 +160,7 @@ class OTAUpdater:
     def _download_code(self) -> bool:
         all_files_found = True
         
-        # self._make_dir_structure()
+        self._make_dir_structure()
         
         try:
             try:

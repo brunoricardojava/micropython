@@ -4,7 +4,6 @@
         "/boot.py",
         "/main.py",
         "/lib/ota_example.py",
-        "/test/test.py",
         "/pymakr.conf",
         "/secret.py",
         "/version.json"

@@ -109,20 +109,21 @@ class OTAUpdater:
     @staticmethod
     def _make_dirs_recursive(file_path) -> None:
         file_path = file_path.strip("/")
-        directory, filename = file_path.rsplit('/', 1)
-        try:
-            os.stat(directory)
-        except OSError:
-            directory_parts = directory.split("/")
+        if len(file_path.split("/") > 1):
+            directory, filename = file_path.rsplit('/', 1)
+            try:
+                os.stat(directory)
+            except OSError:
+                directory_parts = directory.split("/")
 
-            for i in range(1, len(directory_parts) +1):
-                sub_dir = "/".join(directory_parts[:i])
-                try:
-                    os.mkdir(sub_dir)
-                except:
-                    pass
-        except Exception as e:
-            print(f"Erro ao criar diretorios: {e}")
+                for i in range(1, len(directory_parts) +1):
+                    sub_dir = "/".join(directory_parts[:i])
+                    try:
+                        os.mkdir(sub_dir)
+                    except:
+                        pass
+            except Exception as e:
+                print(f"Erro ao criar diretorios: {e}")
 
     def _remove_directory_recursive(self, directory):
         def recursive_remove(current_directory):
@@ -154,6 +155,8 @@ class OTAUpdater:
 
     def _download_code(self) -> bool:
         all_files_found = True
+        
+        self._make_dirs_recursive(self._filenames)
         
         try:
             try:
@@ -192,7 +195,7 @@ class OTAUpdater:
                     
                 print("Instalação concluida!")
 
-                self._delete_tmp_dirs()
+                self._delete_tmp_dir()
 
                 return True
             else:

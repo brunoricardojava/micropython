@@ -11,7 +11,7 @@ class OTAUpdater:
         filenames: list = None,
         timeout:int = 5,
         soft_reset: bool = False,
-        hard_set: bool = False
+        hard_reset: bool = False
         ) -> None:
 
         self._version_file_name = "version.json"
@@ -21,7 +21,7 @@ class OTAUpdater:
         self._current_version = None
         self._timeout = timeout
         self._soft_reset = soft_reset
-        self._hard_reset = hard_set
+        self._hard_reset = hard_reset
         
         self._load_version_file()
 

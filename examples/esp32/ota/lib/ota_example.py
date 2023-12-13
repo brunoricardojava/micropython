@@ -5,13 +5,23 @@ import urequests as requests
 
 
 class OTAUpdater:
-    def __init__(self, repo_url: str, filenames: list = None, timeout:int = 5) -> None:
+    def __init__(
+        self,
+        repo_url: str,
+        filenames: list = None,
+        timeout:int = 5,
+        soft_reset: bool = False,
+        hard_set: bool = False
+        ) -> None:
+
         self._version_file_name = "version.json"
         self._repo_url = self._repo_url_parser(repo_url)
         self._filenames = filenames
         self._version_url = self._version_url_parser()
         self._current_version = None
         self._timeout = timeout
+        self._soft_reset = soft_reset
+        self._hard_reset = hard_set
         
         self._load_version_file()
 
@@ -169,7 +179,9 @@ class OTAUpdater:
         if self.check_for_updates():
             print("Atualização encontrada, seguindo com o download...")
             if self.download_code():
-                input("Pressione enter para reiniciar o dispositivo...")
-                machine.reset()
+                if self._soft_reset:
+                    machine.soft_reset()
+                if self._hard_reset:
+                    machine.reset()
         else:
             print(f"Dispositivo atualizado. Versão: {self._current_version}")

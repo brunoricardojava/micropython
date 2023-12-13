@@ -18,4 +18,4 @@ while not station.isconnected():
 
 print(f"Conected. Network config: {station.ifconfig()}")
 
-OTAUpdater(url_project).update()
+OTAUpdater(url_project, hard_reset=True).update()

@@ -124,6 +124,10 @@ class OTAUpdater:
                         pass
             except Exception as e:
                 print(f"Erro ao criar diretorios: {e}")
+    
+    def _make_dir_structure(self):
+        for file in self._filenames:
+            self._make_dirs_recursive(file)
 
     def _remove_directory_recursive(self, directory):
         def recursive_remove(current_directory):
@@ -156,7 +160,7 @@ class OTAUpdater:
     def _download_code(self) -> bool:
         all_files_found = True
         
-        self._make_dirs_recursive(self._filenames)
+        self._make_dir_structure()
         
         try:
             try:

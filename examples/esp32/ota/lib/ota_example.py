@@ -109,7 +109,7 @@ class OTAUpdater:
     @staticmethod
     def _make_dirs_recursive(file_path) -> None:
         file_path = file_path.strip("/")
-        if len(file_path.split("/") > 1):
+        if len(file_path.split("/")) > 1:
             directory, filename = file_path.rsplit('/', 1)
             try:
                 os.stat(directory)
@@ -152,7 +152,7 @@ class OTAUpdater:
     @classmethod
     def _delete_tmp_dir(cls) -> None:
         try:
-            # os.rmdir("tmp")
+            os.rmdir("tmp")
             cls._remove_directory_recursive("tmp")
         except:
             pass
@@ -160,7 +160,7 @@ class OTAUpdater:
     def _download_code(self) -> bool:
         all_files_found = True
         
-        self._make_dir_structure()
+        # self._make_dir_structure()
         
         try:
             try:

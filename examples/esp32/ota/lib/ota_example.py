@@ -150,7 +150,7 @@ class OTAUpdater:
                         code_file.write(new_file.read())
                     os.remove(tmp_path)
                     
-                print("Instlaação concluida!")
+                print("Instalação concluida!")
 
                 try:
                     os.rmdir("tmp")
@@ -169,7 +169,7 @@ class OTAUpdater:
         if self.check_for_updates():
             print("Atualização encontrada, seguindo com o download...")
             if self.download_code():
-                input("Download feito com sucesso. Pressione enter para aplicar as alterações...")
+                input("Pressione enter para reiniciar o dispositivo...")
                 machine.reset()
         else:
             print(f"Dispositivo atualizado. Versão: {self._current_version}")

@@ -1,26 +1,28 @@
+import machine
 import uos as os
 import ujson as json
 import urequests as requests
 
 
 class OTAUpdater:
-    def __init__(self, repo_url: str, filenames: list = None) -> None:
+    def __init__(self, repo_url: str, filenames: list = None, timeout:int = 5) -> None:
         self._version_file_name = "version.json"
         self._repo_url = self._repo_url_parser(repo_url)
         self._filenames = filenames
         self._version_url = self._version_url_parser()
         self._current_version = None
+        self._timeout = timeout
         
         self._load_version_file()
 
     def _repo_url_parser(self, repo_url) -> str:
+        repo_url = repo_url.strip("/")
         repo_url = self._change_domain_url(repo_url)
         repo_url = self._remove_tree_url(repo_url)
         return repo_url
     
     @staticmethod
     def _change_domain_url(repo_url: str) -> str:
-        repo_url = repo_url.strip("/")
         domain_to_replace = "https://github.com/"
         domain_to_use = "https://raw.githubusercontent.com/"
         return repo_url.replace(domain_to_replace, domain_to_use)
@@ -73,12 +75,12 @@ class OTAUpdater:
         recursive_search(root_dir)
         return file_list
 
-    def check_for_updates(self, timeout=5) -> bool:
+    def check_for_updates(self) -> bool:
         new_version_available = False
         headers = {"accept": "application/json"}
 
         try:
-            response = requests.get(self._version_url, headers=headers, timeout=timeout)
+            response = requests.get(self._version_url, headers=headers, timeout=self._timeout)
             if response.status_code < 200 or response.status_code >= 300:
                 print(f"Falha na requisição, status_code: {response.status_code}")
                 return False
@@ -92,3 +94,54 @@ class OTAUpdater:
             print(f"Request Exception: {e}")
 
         return new_version_available
+
+    def download_code(self) -> bool:
+        all_files_found = True
+        
+        try:
+            try:
+                os.mkdir("tmp")
+            except:
+                pass
+            
+            for file in self._filenames:
+                url_request = self._repo_url + file
+                response = requests.get(url_request, timeout=self._timeout)
+                
+                response_status_code = response.status_code
+                response_text = response.text
+                response.close()
+                
+                if response_status_code < 200 or response_status_code >= 300:
+                    print(f"Arquivo não encontrado: {url_request}")
+                    all_files_found = False
+                
+                with open(f"tmp{file}", "w") as update_file:
+                    update_file.write(response_text)
+            
+            if all_files_found:
+                for file in self._filenames:
+                    with open(f"tmp{file}", "r") as new_file, open(file, "w") as code_file:
+                        code_file.write(new_file.read())
+                    os.remove(f"tmp{file}")
+                
+                try:
+                    os.rmdir("tmp")
+                except:
+                    pass
+                
+                return True
+            else:
+                return False
+        except Exception as e:
+            print(f"Alguma coisa deu errado: {e}")
+            return False
+
+    def update(self):
+        if self.check_for_updates():
+            print("Atualização encontrada, seguindo com o download...")
+            if self.download_code():
+                input("Download feito com sucesso. Pressione enter para aplicar as alterações...")
+                machine.reset()
+        else:
+            print(f"Dispositivo atualizado. Versão: {self._current_version}")

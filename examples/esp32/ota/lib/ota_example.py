@@ -99,6 +99,8 @@ class OTAUpdater:
             remote_version = version_json.get("version")
 
             if self._current_version != remote_version:
+                print(f"Versão do dispositivo: {self._current_version}")
+                print(f"Versão da atualização: {remote_version}")
                 new_version_available = True
                 self._filenames = version_json.get("filenames")
         except Exception as e:

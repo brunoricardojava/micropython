@@ -129,7 +129,8 @@ class OTAUpdater:
         for file in self._filenames:
             self._make_dirs_recursive(file)
 
-    def _remove_directory_recursive(self, directory):
+    @staticmethod
+    def _remove_directory_recursive(directory):
         def recursive_remove(current_directory):
             try:
                 items = os.listdir(current_directory)
@@ -152,7 +153,6 @@ class OTAUpdater:
     @classmethod
     def _delete_tmp_dir(cls) -> None:
         try:
-            os.rmdir("tmp")
             cls._remove_directory_recursive("tmp")
         except:
             pass

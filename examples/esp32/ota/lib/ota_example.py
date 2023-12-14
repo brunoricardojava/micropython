@@ -152,12 +152,22 @@ class OTAUpdater:
 
         recursive_remove(directory)
 
-    @classmethod
-    def _delete_tmp_dir(cls) -> None:
+    def _delete_tmp_dir(self) -> None:
         try:
-            cls._remove_directory_recursive("tmp")
+            self._remove_directory_recursive("tmp")
         except:
             pass
+        
+        root_dirs_device = os.listdir()
+        root_dirs_project = [value.split("/")[0] for value in self._filenames]
+        
+        dirs_to_delete = [value for value in root_dirs_device not in root_dirs_project]
+        
+        for dir_to_delete in dirs_to_delete:
+            try:
+                self._remove_directory_recursive(dir_to_delete)
+            except Exception as e:
+                pass
 
     def _download_code(self) -> bool:
         all_files_found = True

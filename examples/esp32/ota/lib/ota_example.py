@@ -135,7 +135,7 @@ class OTAUpdater:
             try:
                 items = os.listdir(current_directory)
                 for item in items:
-                    item_path = '{}/{}'.format(current_directory, item)
+                    item_path = current_directory + "/" + item
                     try:
                         if os.stat(item_path)[0] & 0o040000:  # Verifica se é um diretório
                             recursive_remove(item_path)  # Chama recursivamente para o diretório encontrado
